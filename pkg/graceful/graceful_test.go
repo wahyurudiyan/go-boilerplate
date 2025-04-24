@@ -1,4 +1,4 @@
-package graceful
+package graceful_test
 
 import (
 	"context"
@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	. "github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
 )
 
 // Custom handler to capture logs during tests
