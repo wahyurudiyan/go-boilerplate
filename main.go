@@ -11,6 +11,16 @@ import (
 	"github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
 )
 
+// @title Golang Boilerplate Example API
+// @version 0.1
+// @description This is a sample boilerplate project for golang backend service
+// @termsOfService http://swagger.io/terms/
+// @contact.name API Support
+// @contact.email fiber@swagger.io
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host localhost:8080
+// @BasePath /
 func main() {
 	var cfg env.ServiceConfig
 	config.Load(&cfg)

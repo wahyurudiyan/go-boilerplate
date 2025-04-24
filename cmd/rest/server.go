@@ -8,6 +8,7 @@ import (
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/routes"
 	"github.com/wahyurudiyan/go-boilerplate/config"
 
+	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -56,6 +57,15 @@ func (s *httpServer) newServer() *fiber.App {
 	Initialize http server
 	*/
 	app := fiber.New(opt)
+
+	swaggerOpt := swagger.Config{
+		BasePath: "/api/v1",
+		FilePath: "./docs/swagger.json",
+		Path:     "swagger",
+		Title:    "Swagger API Docs",
+		CacheAge: 10 * 60, // 10 minutes
+	}
+	app.Use(swagger.New(swaggerOpt))
 	routes.Routes(app)
 
 	return app
