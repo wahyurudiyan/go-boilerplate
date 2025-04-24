@@ -20,14 +20,20 @@ func main() {
 			srv := rest.NewServer(&cfg)
 			if err := srv.Listen(); err != nil {
 				slog.ErrorContext(context.Background(), "unable to run server", "error", err)
-				return nil, err
 			}
 
 			return func(ctx context.Context) error {
 				return srv.Shutdown(ctx)
 			}, nil
 		},
+		"test": func(ctx context.Context) (graceful.ShutdownCallback, error) {
+			slog.Info("This only graceful execution test exec")
+			return func(ctx context.Context) error {
+				slog.Info("This only graceful execution test shutdown")
+				return nil
+			}, nil
+		},
 	}
 
-	graceful.Runner(context.Background(), time.Duration(10*time.Second), runApp)
+	graceful.Run(context.Background(), time.Duration(10*time.Second), runApp)
 }
