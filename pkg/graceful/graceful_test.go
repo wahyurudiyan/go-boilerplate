@@ -210,6 +210,7 @@ func TestRunWithFailingService(t *testing.T) {
 
 // TODO: find another way to create slow shutdown function.
 // this test PASS when the code running with debug mode.
+
 // func TestRunWithSlowShutdown(t *testing.T) {
 // 	logHandler := setupTestLogger()
 
