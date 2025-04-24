@@ -2,7 +2,6 @@ package graceful
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -15,44 +14,92 @@ type ShutdownCallback func(ctx context.Context) error
 
 type ExecCallback func(ctx context.Context) (ShutdownCallback, error)
 
-func Runner(ctx context.Context, timeout time.Duration, ops map[string]ExecCallback) (<-chan struct{}, error) {
-	var (
-		shutdownCb = make(map[string]ShutdownCallback)
-	)
+func Run(ctx context.Context, timeout time.Duration, ops map[string]ExecCallback) error {
+	// Create a base context for running operations
+	runCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
-	// Execute operations and collect shutdown callbacks
-	for opName, opFn := range ops {
-		sdCallback, err := opFn(ctx)
-		if err != nil {
-			// Clean up any already started operations
-			cleanupCtx, cancel := context.WithTimeout(ctx, timeout)
-			defer cancel()
+	// Start all operations and collect shutdown callbacks
+	var shutdownCallbacksMu sync.Mutex
+	shutdownCallbacks := make(map[string]ShutdownCallback)
+	var startupWg sync.WaitGroup
+	var startupErr error
+	var startupErrMu sync.Mutex
 
-			for name, callback := range shutdownCb {
-				if err := callback(cleanupCtx); err != nil {
-					slog.ErrorContext(ctx, fmt.Sprintf("%s failed during cleanup", name), "error", err)
+	// Start all services concurrently
+	for name, operation := range ops {
+		startupWg.Add(1)
+		go func(name string, operation ExecCallback) {
+			defer startupWg.Done()
+
+			slog.InfoContext(ctx, "[Graceful] 🚀 starting service", "name", name)
+
+			callback, err := operation(runCtx)
+			if err != nil {
+				slog.ErrorContext(ctx, "[Graceful] ⛔ failed to start service", "name", name, "error", err)
+				startupErrMu.Lock()
+				if startupErr == nil {
+					startupErr = err
 				}
+				startupErrMu.Unlock()
+				cancel() // Cancel context to signal other operations to terminate
+				return
 			}
 
-			return nil, fmt.Errorf("operation %s failed to start: %w", opName, err)
-		}
-
-		shutdownCb[opName] = sdCallback
+			if callback != nil {
+				shutdownCallbacksMu.Lock()
+				shutdownCallbacks[name] = callback
+				shutdownCallbacksMu.Unlock()
+				slog.InfoContext(ctx, "[Graceful] ✅ service started successfully", "name", name)
+			}
+		}(name, operation)
 	}
 
-	// Register shutdown handlers
-	wait, err := Shutdown(ctx, timeout, shutdownCb)
+	go func() {
+		// Wait for all services to start or fail
+		startupWg.Wait()
+	}()
+
+	// Check if any service failed to start
+	startupErrMu.Lock()
+	hasStartupError := startupErr != nil
+	startupErrMu.Unlock()
+
+	if hasStartupError {
+		slog.ErrorContext(ctx, "[Graceful] ⛔ one or more services failed to start")
+		// Still proceed with shutdown for any services that did start
+	} else {
+		slog.InfoContext(ctx, "[Graceful] 🌟 all services started successfully")
+	}
+
+	// Initiate shutdown process
+	slog.InfoContext(ctx, "[Graceful] 🌟 service shutting down")
+	shutdownCallbacksMu.Lock()
+	cloneCallback := make(map[string]ShutdownCallback, len(shutdownCallbacks))
+	for k, v := range shutdownCallbacks {
+		cloneCallback[k] = v
+	}
+	shutdownCallbacksMu.Unlock()
+
+	wait, err := Shutdown(ctx, timeout, cloneCallback)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return wait, nil
+	// Wait for shutdown to complete
+	<-wait
+
+	startupErrMu.Lock()
+	defer startupErrMu.Unlock()
+	return startupErr
 }
 
 func Shutdown(ctx context.Context, timeout time.Duration, ops map[string]ShutdownCallback) (<-chan struct{}, error) {
 	wait := make(chan struct{})
 
 	go func() {
+		defer close(wait)
+
 		// Define graceful shutdown
 		shutdownSignals := []os.Signal{
 			syscall.SIGINT,
@@ -65,29 +112,24 @@ func Shutdown(ctx context.Context, timeout time.Duration, ops map[string]Shutdow
 
 		// Wait for signal
 		<-sigCtx.Done()
-		slog.InfoContext(ctx, "Shutdown signal received, initiating graceful shutdown")
+		slog.InfoContext(ctx, "[Graceful] 📡 shutdown signal received, initiating graceful shutdown")
 
 		// Create timeout context for shutdown operations
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		var wg sync.WaitGroup
-
-		wg.Add(len(ops))
 		for name, operation := range ops {
-			// Capture loop variables to avoid data race
-			opName := name
-			opFunc := operation
-
-			go func() {
+			wg.Add(1)
+			go func(name string, operation ShutdownCallback) {
 				defer wg.Done()
-				slog.InfoContext(shutdownCtx, fmt.Sprintf("%s is shutting down", opName))
-				if err := opFunc(shutdownCtx); err != nil {
-					slog.ErrorContext(shutdownCtx, fmt.Sprintf("%s failed to shut down", opName), "error", err)
+				slog.Info("[Graceful] 🔻 shutting down", "name", name)
+				if err := operation(shutdownCtx); err != nil {
+					slog.ErrorContext(shutdownCtx, "[Graceful] ⛔ failed to shut down", "name", name, "error", err)
 					return
 				}
-				slog.InfoContext(shutdownCtx, fmt.Sprintf("%s shut down successfully", opName))
-			}()
+				slog.InfoContext(shutdownCtx, "[Graceful] 👍 shutdown successfully", "name", name)
+			}(name, operation)
 		}
 
 		// Wait for all operations to complete or timeout
@@ -99,12 +141,10 @@ func Shutdown(ctx context.Context, timeout time.Duration, ops map[string]Shutdow
 
 		select {
 		case <-done:
-			slog.InfoContext(ctx, "All services shut down successfully")
+			slog.InfoContext(ctx, "[Graceful] 🛬 all services shut down successfully")
 		case <-shutdownCtx.Done():
-			slog.WarnContext(ctx, "Shutdown timed out before all services could shut down cleanly")
+			slog.WarnContext(ctx, "[Graceful] ⏱️ shutdown timeout before all services could shut down cleanly")
 		}
-
-		close(wait)
 	}()
 
 	return wait, nil
