@@ -15,6 +15,31 @@
         "version": "0.1"
     },
     "host": "localhost:8080",
-    "basePath": "/",
-    "paths": {}
+    "basePath": "/api/v1",
+    "paths": {
+        "/health-check": {
+            "get": {
+                "description": "the health check endpoint provide the status of server.",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "root"
+                ],
+                "summary": "Show the status of server.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

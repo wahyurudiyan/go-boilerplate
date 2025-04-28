@@ -1,21 +1,24 @@
 package routes
 
 import (
-	fiberSwagger "github.com/swaggo/fiber-swagger"
+	"github.com/gofiber/swagger"
+	"github.com/wahyurudiyan/go-boilerplate/api/rest/controller"
+	_ "github.com/wahyurudiyan/go-boilerplate/docs"
 
 	"github.com/gofiber/fiber/v2"
-	_ "github.com/swaggo/fiber-swagger/example/docs"
 )
 
-func swagger(app fiber.Router) {
-	app.Get("/swagger/*", fiberSwagger.WrapHandler)
+func openAPI(app fiber.Router) {
+	app.Get("/swagger/*", swagger.HandlerDefault) // default handler
 }
 
 func Routes(app fiber.Router) {
 	// Init swagger endpoint
-	swagger(app)
+	openAPI(app)
 
 	v1 := app.Group("/api/v1")
+	v1.Get("/health-check", controller.HealthCheck)
+
 	productRoutes := v1.Group("/products")
 	productRoutes.Get("/all", func(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusOK)

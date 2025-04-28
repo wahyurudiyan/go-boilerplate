@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api/v1
 host: localhost:8080
 info:
   contact:
@@ -11,5 +11,21 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Golang Boilerplate Example API
   version: "0.1"
-paths: {}
+paths:
+  /health-check:
+    get:
+      consumes:
+      - '*/*'
+      description: the health check endpoint provide the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Show the status of server.
+      tags:
+      - root
 swagger: "2.0"

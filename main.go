@@ -20,7 +20,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host localhost:8080
-// @BasePath /
+// @BasePath /api/v1
 func main() {
 	var cfg env.ServiceConfig
 	config.Load(&cfg)
