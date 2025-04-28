@@ -3,7 +3,8 @@ package routes
 import (
 	"github.com/gofiber/swagger"
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/controller"
-	_ "github.com/wahyurudiyan/go-boilerplate/docs"
+
+	_ "github.com/wahyurudiyan/go-boilerplate/docs" // change with your own project docs path
 
 	"github.com/gofiber/fiber/v2"
 )
