@@ -33,15 +33,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Test Endpoint"
+                    "Health Check Endpoint"
                 ],
                 "summary": "Show the status of server.",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "object"
                         }
                     }
                 }
@@ -57,15 +56,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "root"
+                    "Test Endpoint"
                 ],
                 "summary": "Show not implement code error.",
                 "responses": {
                     "501": {
                         "description": "Not Implemented",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "string"
                         }
                     }
                 }

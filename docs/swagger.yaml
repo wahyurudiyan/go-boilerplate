@@ -23,11 +23,10 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
             type: object
       summary: Show the status of server.
       tags:
-      - Test Endpoint
+      - Health Check Endpoint
   /test:
     get:
       consumes:
@@ -39,9 +38,8 @@ paths:
         "501":
           description: Not Implemented
           schema:
-            additionalProperties: true
-            type: object
+            type: string
       summary: Show not implement code error.
       tags:
-      - root
+      - Test Endpoint
 swagger: "2.0"
