@@ -9,19 +9,19 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func openAPI(app fiber.Router) {
+func swaggerAPIDoc(app fiber.Router) {
 	app.Get("/swagger/*", swagger.HandlerDefault) // default handler
 }
 
 func Routes(app fiber.Router) {
 	// Init swagger endpoint
-	openAPI(app)
+	swaggerAPIDoc(app)
 
-	v1 := app.Group("/api/v1")
-	v1.Get("/health-check", controller.HealthCheck)
-	v1.Get("/test", controller.NotImplementController)
+	rootPathV1 := app.Group("/api/v1")
+	rootPathV1.Get("/health-check", controller.HealthCheck)
+	rootPathV1.Get("/test", controller.NotImplementController)
 
-	productRoutes := v1.Group("/products")
+	productRoutes := rootPathV1.Group("/products")
 	productRoutes.Get("/all", func(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusOK)
 	})
