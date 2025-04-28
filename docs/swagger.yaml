@@ -27,5 +27,21 @@ paths:
             type: object
       summary: Show the status of server.
       tags:
+      - Test Endpoint
+  /test:
+    get:
+      consumes:
+      - '*/*'
+      description: not implement code error.
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Show not implement code error.
+      tags:
       - root
 swagger: "2.0"

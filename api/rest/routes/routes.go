@@ -19,6 +19,7 @@ func Routes(app fiber.Router) {
 
 	v1 := app.Group("/api/v1")
 	v1.Get("/health-check", controller.HealthCheck)
+	v1.Get("/test", controller.NotImplementController)
 
 	productRoutes := v1.Group("/products")
 	productRoutes.Get("/all", func(ctx *fiber.Ctx) error {

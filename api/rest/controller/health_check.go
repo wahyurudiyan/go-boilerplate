@@ -5,7 +5,7 @@ import "github.com/gofiber/fiber/v2"
 // HealthCheck godoc
 // @Summary Show the status of server.
 // @Description the health check endpoint provide the status of server.
-// @Tags root
+// @Tags Health Check Endpoint
 // @Accept */*
 // @Produce json
 // @Success 200 {object} map[string]interface{}
