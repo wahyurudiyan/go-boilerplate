@@ -1,28 +1,32 @@
 package routes
 
 import (
-	"github.com/gofiber/swagger"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/controller"
-
-	_ "github.com/wahyurudiyan/go-boilerplate/docs" // change with your own project docs path
-
-	"github.com/gofiber/fiber/v2"
+	"github.com/wahyurudiyan/go-boilerplate/docs" // change with your own project docs path
+	// _ "github.com/wahyurudiyan/go-boilerplate/docs" // change with your own project docs path
 )
 
-func swaggerAPIDoc(app fiber.Router) {
-	app.Get("/swagger/*", swagger.HandlerDefault) // default handler
+func swaggerAPIDoc(router *gin.Engine) {
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler)) // default handler
 }
 
-func Routes(app fiber.Router) {
-	// Init swagger endpoint
-	swaggerAPIDoc(app)
+func Routes(router *gin.Engine) {
+	// Init base path
+	rootPathV1 := router.Group("/api/v1")
+	rootPathV1.GET("/health-check", controller.HealthCheck)
+	rootPathV1.GET("/test", controller.NotImplementController)
 
-	rootPathV1 := app.Group("/api/v1")
-	rootPathV1.Get("/health-check", controller.HealthCheck)
-	rootPathV1.Get("/test", controller.NotImplementController)
+	// Init swagger endpoint
+	docs.SwaggerInfo.BasePath = rootPathV1.BasePath()
+	swaggerAPIDoc(router)
 
 	productRoutes := rootPathV1.Group("/products")
-	productRoutes.Get("/all", func(ctx *fiber.Ctx) error {
-		return ctx.SendStatus(fiber.StatusOK)
+	productRoutes.GET("/all", func(ctx *gin.Context) {
+		ctx.Status(http.StatusOK)
 	})
 }

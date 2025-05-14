@@ -1,6 +1,10 @@
 package controller
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 // HealthCheck godoc
 // @Summary Show the status of server.
@@ -10,14 +14,11 @@ import "github.com/gofiber/fiber/v2"
 // @Produce json
 // @Success 200 {object} object
 // @Router /health-check [GET]
-func HealthCheck(c *fiber.Ctx) error {
+func HealthCheck(c *gin.Context) {
 	res := map[string]interface{}{
 		"data": "Server is up and running",
 	}
+	c.JSON(http.StatusOK, res)
 
-	if err := c.JSON(res); err != nil {
-		return err
-	}
-
-	return nil
+	return
 }

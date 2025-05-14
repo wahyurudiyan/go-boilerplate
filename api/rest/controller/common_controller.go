@@ -1,7 +1,9 @@
 package controller
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // SampleNotImplement godoc
@@ -12,6 +14,6 @@ import (
 // @Produce json
 // @Failure 501 {string} string "Not Implemented"
 // @Router /test [GET]
-func NotImplementController(c *fiber.Ctx) error {
-	return fiber.ErrNotImplemented
+func NotImplementController(c *gin.Context) {
+	c.JSON(http.StatusNotImplemented, "handler not implemented")
 }

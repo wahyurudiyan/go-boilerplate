@@ -11,6 +11,10 @@ import (
 	"github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
 )
 
+func init() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+}
+
 // @title Golang Boilerplate Example API
 // @version 0.1
 // @description This is a sample boilerplate project for golang backend service
@@ -27,7 +31,7 @@ func main() {
 
 	runApp := map[string]graceful.ExecCallback{
 		"http-server": func(ctx context.Context) (graceful.ShutdownCallback, error) {
-			srv := rest.NewServer(&cfg)
+			srv := rest.NewGinServer(&cfg)
 			if err := srv.Listen(); err != nil {
 				slog.ErrorContext(context.Background(), "unable to run server", "error", err)
 			}
