@@ -1,0 +1,45 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: This is a sample boilerplate project for golang backend service
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Golang Boilerplate Example API
+  version: "0.1"
+paths:
+  /health-check:
+    get:
+      consumes:
+      - '*/*'
+      description: the health check endpoint provide the status of server.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+      summary: Show the status of server.
+      tags:
+      - Health Check Endpoint
+  /test:
+    get:
+      consumes:
+      - '*/*'
+      description: not implement code error.
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+          schema:
+            type: string
+      summary: Show not implement code error.
+      tags:
+      - Test Mot Implemented Endpoint
+swagger: "2.0"
