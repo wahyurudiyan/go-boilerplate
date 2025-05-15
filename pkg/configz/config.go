@@ -1,4 +1,4 @@
-package config
+package configz
 
 import (
 	"log/slog"
@@ -17,7 +17,7 @@ func getEnvFile() string {
 	return envFile
 }
 
-func Load[T any](out *T) {
+func MustLoadEnv[T any](out *T) {
 	file := getEnvFile()
 
 	viper.SetConfigFile(file)

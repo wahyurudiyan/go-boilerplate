@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"time"
 
-	"github.com/wahyurudiyan/go-boilerplate/cmd/rest"
+	"github.com/wahyurudiyan/go-boilerplate/app"
 	env "github.com/wahyurudiyan/go-boilerplate/config"
-	"github.com/wahyurudiyan/go-boilerplate/pkg/config"
+	"github.com/wahyurudiyan/go-boilerplate/pkg/configz"
 	"github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
+	"github.com/wahyurudiyan/go-boilerplate/pkg/telemetry"
 )
 
 func init() {
@@ -26,28 +28,31 @@ func init() {
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
-	var cfg env.ServiceConfig
-	config.Load(&cfg)
+	var cfg *env.ServiceConfig
+	configz.MustLoadEnv(&cfg)
+	ctx := context.Background()
 
-	runApp := map[string]graceful.ExecCallback{
-		"http-server": func(ctx context.Context) (graceful.ShutdownCallback, error) {
-			srv := rest.NewGinServer(&cfg)
-			if err := srv.Listen(); err != nil {
-				slog.ErrorContext(context.Background(), "unable to run server", "error", err)
-			}
-
-			return func(ctx context.Context) error {
-				return srv.Shutdown(ctx)
-			}, nil
-		},
-		"test": func(ctx context.Context) (graceful.ShutdownCallback, error) {
-			slog.Info("This only graceful execution test exec")
-			return func(ctx context.Context) error {
-				slog.Info("This only graceful execution test shutdown")
-				return nil
-			}, nil
-		},
+	// Setup Opentelemetry SDK
+	telemetryShutdown, err := telemetry.SetupOpentelemetry(ctx, telemetry.TelemetrySetup{
+		Interval:           cfg.TelemetryMeterInterval,
+		ServiceName:        cfg.ApplicationName,
+		ServiceVersion:     cfg.ApplicationVersion,
+		EnableRuntimeMeter: cfg.TelemetryEnableRuntimeMeter,
+	})
+	if err != nil {
+		panic(err)
 	}
 
-	graceful.Run(context.Background(), time.Duration(10*time.Second), runApp)
+	defer func() {
+		err = errors.Join(err, telemetryShutdown(ctx))
+		slog.Error("Service shutting down with error", "error", err)
+	}()
+
+	// Run application gracefully
+	runApp := map[string]graceful.ExecCallback{
+		"http-server": app.RestBootstrap(cfg),
+	}
+	if err := graceful.Run(context.Background(), time.Duration(10*time.Second), runApp); err != nil {
+		panic(err)
+	}
 }

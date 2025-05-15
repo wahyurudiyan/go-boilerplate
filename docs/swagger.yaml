@@ -41,5 +41,5 @@ paths:
             type: string
       summary: Show not implement code error.
       tags:
-      - Test Endpoint
+      - Test Mot Implemented Endpoint
 swagger: "2.0"

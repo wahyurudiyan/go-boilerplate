@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -11,22 +9,29 @@ import (
 	// _ "github.com/wahyurudiyan/go-boilerplate/docs" // change with your own project docs path
 )
 
-func swaggerAPIDoc(router *gin.Engine) {
+type routerBootstrap struct {
+	controller *controller.ControllerBootstrap
+}
+
+func NewRouter(c *controller.ControllerBootstrap) *routerBootstrap {
+	return &routerBootstrap{
+		controller: c,
+	}
+}
+
+func (r *routerBootstrap) swaggerAPIDoc(router *gin.Engine) {
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler)) // default handler
 }
 
-func Routes(router *gin.Engine) {
+func (r *routerBootstrap) Routes(router *gin.Engine) {
 	// Init base path
 	rootPathV1 := router.Group("/api/v1")
 	rootPathV1.GET("/health-check", controller.HealthCheck)
-	rootPathV1.GET("/test", controller.NotImplementController)
 
 	// Init swagger endpoint
 	docs.SwaggerInfo.BasePath = rootPathV1.BasePath()
-	swaggerAPIDoc(router)
+	r.swaggerAPIDoc(router)
 
-	productRoutes := rootPathV1.Group("/products")
-	productRoutes.GET("/all", func(ctx *gin.Context) {
-		ctx.Status(http.StatusOK)
-	})
+	userRoutes := rootPathV1.Group("/users")
+	userRoutes.POST("/signup", r.controller.SignUp)
 }

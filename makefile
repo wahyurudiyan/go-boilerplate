@@ -44,7 +44,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make          - Generate Swagger docs, build and run the application"
 	@echo "  make build    - Build the application"
-	@echo "  make run      - Run the application without building"
+	@echo "  make run      - Run the application and generate swagger without building"
 	@echo "  make swagger  - Generate Swagger documentation"
 	@echo "  make dev      - Run with live-reload if Air is installed"
 	@echo "  make clean    - Remove build artifacts"

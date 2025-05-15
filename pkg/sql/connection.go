@@ -5,9 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wahyurudiyan/go-boilerplate/pkg/config"
-
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -15,12 +14,9 @@ type sqlClient struct {
 	cfg *SQLConfig
 }
 
-func NewClient() (*sqlx.DB, error) {
-	var cfg SQLConfig
-	config.Load(&cfg)
-
+func NewClient(cfg *SQLConfig) (*sqlx.DB, error) {
 	sqlCli := sqlClient{
-		cfg: &cfg,
+		cfg: cfg,
 	}
 
 	return sqlCli.newConn()
@@ -28,9 +24,17 @@ func NewClient() (*sqlx.DB, error) {
 
 func (s *sqlClient) newConn() (*sqlx.DB, error) {
 	dsn := s.constructDSN()
+	if s.cfg.DatabaseDriver == "postgres" {
+		s.cfg.DatabaseDriver = "pgx"
+	}
+
 	db, err := sqlx.Open(s.cfg.DatabaseDriver, dsn)
 	if err != nil {
 		panic(err)
+	}
+
+	if err := db.Ping(); err != nil {
+		return nil, err
 	}
 
 	// DatabaseSetMaxIdleConnection sets the maximum number of idle connections in the pool.
@@ -67,7 +71,6 @@ func (s *sqlClient) newMySQLDataSourceName() string {
 }
 
 func (s *sqlClient) newPostgresDataSourceName() string {
-
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		s.cfg.DatabaseHost, s.cfg.DatabaseUsername, s.cfg.DatabasePassword,

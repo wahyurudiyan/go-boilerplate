@@ -56,7 +56,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Test Endpoint"
+                    "Test Mot Implemented Endpoint"
                 ],
                 "summary": "Show not implement code error.",
                 "responses": {

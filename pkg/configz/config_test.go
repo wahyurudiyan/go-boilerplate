@@ -1,4 +1,4 @@
-package config_test
+package configz_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/wahyurudiyan/go-boilerplate/pkg/config"
+	"github.com/wahyurudiyan/go-boilerplate/pkg/configz"
 )
 
 type mockConfig struct {
@@ -37,7 +37,7 @@ func TestLoad_WithDotEnvPresent(t *testing.T) {
 	require.NoError(t, os.Chdir(tmpDir))
 
 	var cfg mockConfig
-	config.Load(&cfg)
+	configz.MustLoadEnv(&cfg)
 
 	require.Equal(t, "from-dot-env", cfg.AppName)
 }
@@ -54,7 +54,7 @@ func TestLoad_FallbackToDotEnvExample(t *testing.T) {
 	require.NoError(t, os.Chdir(tmpDir))
 
 	var cfg mockConfig
-	config.Load(&cfg)
+	configz.MustLoadEnv(&cfg)
 
 	require.Equal(t, "from-example", cfg.AppName)
 }
@@ -70,7 +70,7 @@ func TestLoad_PanicsIfNoEnvFile(t *testing.T) {
 	var cfg mockConfig
 
 	require.Panics(t, func() {
-		config.Load(&cfg)
+		configz.MustLoadEnv(&cfg)
 	})
 }
 
@@ -86,6 +86,6 @@ func TestLoad_PanicsIfUnmarshalFails(t *testing.T) {
 
 	var cfg mockConfigPanic
 	require.Panics(t, func() {
-		config.Load(&cfg)
+		configz.MustLoadEnv(&cfg)
 	})
 }

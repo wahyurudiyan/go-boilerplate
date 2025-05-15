@@ -8,32 +8,43 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/wahyurudiyan/go-boilerplate/api/rest/routes"
 	"github.com/wahyurudiyan/go-boilerplate/config"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-type httpGinServer struct {
+type ginServer struct {
 	srv    *http.Server
 	cfg    *config.ServiceConfig
 	router *gin.Engine
 }
 
-func (s *httpGinServer) newGinServer() *gin.Engine {
-	engine := gin.Default()
-	return engine
+func newGinServer(cfg *config.ServiceConfig) *ginServer {
+	var s ginServer
+	s.cfg = cfg
+	ginEngine := gin.Default()
+	ginEngine.Use(otelgin.Middleware(cfg.ApplicationName))
+
+	s.router = ginEngine
+	return &s
 }
 
-func (s *httpGinServer) Listen() error {
+func (s *ginServer) RegisterRoutes(routesFn func(*gin.Engine)) {
+	if s.router != nil {
+		routesFn(s.router)
+	}
+}
+
+func (s *ginServer) Run() error {
+	handler := otelhttp.NewHandler(s.router.Handler(), "")
 	listener := http.Server{
 		Addr:         fmt.Sprintf(":%v", s.cfg.RestPort),
-		Handler:      s.router,
+		Handler:      handler,
 		ReadTimeout:  time.Duration(s.cfg.RestReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(s.cfg.RestWriteTimeout) * time.Second,
 		IdleTimeout:  time.Duration(s.cfg.RestIdleTimeout) * time.Second,
 	}
 	s.srv = &listener
-
-	routes.Routes(s.router)
 
 	slog.Info("[SERVER] running...", "port", s.cfg.RestPort)
 	if err := listener.ListenAndServe(); err != nil {
@@ -43,7 +54,7 @@ func (s *httpGinServer) Listen() error {
 	return nil
 }
 
-func (s *httpGinServer) Shutdown(ctx context.Context) error {
+func (s *ginServer) Shutdown(ctx context.Context) error {
 	if s.srv == nil {
 		return http.ErrServerClosed
 	}

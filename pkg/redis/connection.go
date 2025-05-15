@@ -5,8 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"github.com/wahyurudiyan/go-boilerplate/pkg/config"
-
 	goRedis "github.com/redis/go-redis/v9"
 )
 
@@ -14,12 +12,9 @@ type redisClient struct {
 	cfg *RedisConfig
 }
 
-func NewClient() (*goRedis.Client, error) {
-	var cfg RedisConfig
-	config.Load(&cfg)
-
+func NewClient(cfg *RedisConfig) (*goRedis.Client, error) {
 	newCli := redisClient{
-		cfg: &cfg,
+		cfg: cfg,
 	}
 
 	client, err := newCli.connect()
