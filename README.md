@@ -50,8 +50,6 @@ go-boilerplate
 │   └── swagger.yaml
 ├── go.mod
 ├── go.sum
-├── http-request-collections
-│   └── sign-up.http
 ├── LICENSE
 ├── main.go
 ├── makefile
