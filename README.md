@@ -108,7 +108,7 @@ This is checklist for the next features. For more detail will be discussed withi
 - [ ] GRPC WITH OTELGRPC FOR EXTERNAL CALL
 - [ ] SEMANTIC CONVENTIONS FOR ERROR CODE, ERROR MESSAGE, ETC.
 - [ ] HANDLING CONCURRENCY GROUP SQL-SELECT OR HTTP-GET WITH SINGLEFLIGHT 
-- [ ] WIKI DOCS
+- [ ] WIKI DOCS: [Wiki](https://github.com/wahyurudiyan/go-boilerplate/wiki)
 - [ ] DOCKERFILE
 - [ ] KUBERNETES MANIFEST
 
