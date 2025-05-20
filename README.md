@@ -1,4 +1,4 @@
-# Production Ready Golang Boilerplate (with sample HTTP CRUD)
+# Golang Boilerplate for Backend
 
 Go Boilerplate is a project template for golang microservices project. It has sample to use this boilerplate for HTTP User Server application. The directory tree for this boilerplate will found below:
 

@@ -1,9 +1,38 @@
 basePath: /api/v1
+definitions:
+  common.RESTBody-any:
+    properties:
+      data: {}
+      error:
+        $ref: '#/definitions/common.RESTBodyError'
+      message:
+        type: string
+    type: object
+  common.RESTBodyError:
+    properties:
+      code:
+        type: integer
+      reason:
+        type: string
+    type: object
+  user.SignUpDTO:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
-    email: fiber@swagger.io
-    name: API Support
+    email: wahyurudiyan@gmail.com
+    name: Go Boilerplate API Support
   description: This is a sample boilerplate project for golang backend service
   license:
     name: Apache 2.0
@@ -27,19 +56,35 @@ paths:
       summary: Show the status of server.
       tags:
       - Health Check Endpoint
-  /test:
-    get:
+  /users/signup:
+    post:
       consumes:
       - '*/*'
-      description: not implement code error.
+      description: endpoint that handle user register.
+      parameters:
+      - description: Request body type
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Request Body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/user.SignUpDTO'
       produces:
       - application/json
       responses:
-        "501":
-          description: Not Implemented
+        "200":
+          description: Success
           schema:
-            type: string
-      summary: Show not implement code error.
+            $ref: '#/definitions/common.RESTBody-any'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/common.RESTBody-any'
+      summary: SignUp user endpoint.
       tags:
-      - Test Mot Implemented Endpoint
+      - User Endpoint
 swagger: "2.0"

@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 )
 
-func newMeterProvider(ctx context.Context, interval int, resource *resource.Resource) (*sdkmetric.MeterProvider, error) {
+func newMeterProvider(ctx context.Context, interval time.Duration, resource *resource.Resource) (*sdkmetric.MeterProvider, error) {
 	var (
 		err      error
 		exporter *otlpmetricgrpc.Exporter
@@ -28,7 +28,7 @@ func newMeterProvider(ctx context.Context, interval int, resource *resource.Reso
 	mp := sdkmetric.NewMeterProvider(
 		sdkmetric.WithReader(
 			sdkmetric.NewPeriodicReader(
-				exporter, sdkmetric.WithInterval(time.Duration(interval)*time.Second),
+				exporter, sdkmetric.WithInterval(interval),
 			),
 		),
 	)

@@ -11,8 +11,8 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "API Support",
-            "email": "fiber@swagger.io"
+            "name": "Go Boilerplate API Support",
+            "email": "wahyurudiyan@gmail.com"
         },
         "license": {
             "name": "Apache 2.0",
@@ -46,9 +46,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/test": {
-            "get": {
-                "description": "not implement code error.",
+        "/users/signup": {
+            "post": {
+                "description": "endpoint that handle user register.",
                 "consumes": [
                     "*/*"
                 ],
@@ -56,16 +56,85 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Test Mot Implemented Endpoint"
+                    "User Endpoint"
                 ],
-                "summary": "Show not implement code error.",
-                "responses": {
-                    "501": {
-                        "description": "Not Implemented",
+                "summary": "SignUp user endpoint.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Request body type",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Request Body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/user.SignUpDTO"
                         }
                     }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/common.RESTBody-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/common.RESTBody-any"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "common.RESTBody-any": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error": {
+                    "$ref": "#/definitions/common.RESTBodyError"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "common.RESTBodyError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "reason": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.SignUpDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullname": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         }

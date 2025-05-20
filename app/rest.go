@@ -16,10 +16,12 @@ import (
 )
 
 func RestBootstrap(cfg *config.ServiceConfig) graceful.ExecCallback {
+	var sqlConfig sql.SQLConfig
+	if err := configz.LoadFromAWSParameterStore("(/go-boilerplate/", "user", &sqlConfig); err != nil {
+		panic(err)
+	}
 
-	var sqlConfig *sql.SQLConfig
-	configz.MustLoadEnv(&sqlConfig)
-	sql, err := sql.NewClient(sqlConfig)
+	sql, err := sql.NewClient(&sqlConfig)
 	if err != nil {
 		panic(err)
 	}
