@@ -70,7 +70,7 @@ func Run(ctx context.Context, timeout time.Duration, ops map[string]ExecCallback
 
 	// Initiate shutdown process
 	slog.InfoContext(ctx, "[Graceful] 🌟 register service shutdown callback")
-	wait, err := Shutdown(ctx, timeout, shutdownCallbacks)
+	wait, err := Shutdown(runCtx, timeout, shutdownCallbacks)
 	if err != nil {
 		return err
 	}
