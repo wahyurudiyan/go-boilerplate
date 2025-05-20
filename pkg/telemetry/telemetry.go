@@ -8,7 +8,7 @@ import (
 	otelruntime "go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.30.0"
 )
 
 type ShutdownCallback func(context.Context) error
@@ -17,7 +17,7 @@ type TelemetrySetup struct {
 	ServiceName        string
 	ServiceVersion     string
 	EnableRuntimeMeter bool
-	Interval           int // in second
+	Interval           time.Duration
 }
 
 func SetupOpentelemetry(ctx context.Context, setup TelemetrySetup) (ShutdownCallback, error) {

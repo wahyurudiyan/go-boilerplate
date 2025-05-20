@@ -1,18 +1,20 @@
 package sql
 
+import "time"
+
 type SQLConfig struct {
 	// Database Configuration
-	DatabaseName      string `mapstructure:"DATABASE_NAME"`
-	DatabaseHost      string `mapstructure:"DATABASE_HOST"`
-	DatabasePort      string `mapstructure:"DATABASE_PORT"`
-	DatabaseDriver    string `mapstructure:"DATABASE_DRIVER"` // e.g., "mysql, postgres, etc"
-	DatabaseCharset   string `mapstructure:"DATABASE_CHARSET"`
-	DatabaseUsername  string `mapstructure:"DATABASE_USERNAME"`
-	DatabasePassword  string `mapstructure:"DATABASE_PASSWORD"`
-	DatabaseParsetime bool   `mapstructure:"DATABASE_PARSETIME"`
+	DatabaseName      string `mapstructure:"database_name"`
+	DatabaseHost      string `mapstructure:"database_host"`
+	DatabasePort      string `mapstructure:"database_port"`
+	DatabaseDriver    string `mapstructure:"database_driver"` // e.g., "mysql, postgres, etc"
+	DatabaseCharset   string `mapstructure:"database_charset"`
+	DatabaseUsername  string `mapstructure:"database_username"`
+	DatabasePassword  string `mapstructure:"database_password"`
+	DatabaseParsetime bool   `mapstructure:"database_parsetime"`
 
-	DatabaseMaxOpenConnection     int `mapstructure:"DATABASE_MAX_OPEN_CONNECTION"`
-	DatabaseMaxIdleConnection     int `mapstructure:"DATABASE_MAX_IDLE_CONNECTION"`
-	DatabaseMaxIdleTimeConnection int `mapstructure:"DATABASE_MAX_IDLE_TIME_CONNECTION"` // in seconds or minutes as needed
-	DatabaseMaxLifetimeConnection int `mapstructure:"DATABASE_MAX_LIFETIME_CONNECTION"`  // in seconds or minutes as needed
+	DatabaseMaxOpenConnection     int           `mapstructure:"database_max_open_connection"`
+	DatabaseMaxIdleConnection     int           `mapstructure:"database_max_idle_connection"`
+	DatabaseMaxIdleTimeConnection time.Duration `mapstructure:"database_max_idle_time_connection"` // in seconds or minutes as needed
+	DatabaseMaxLifetimeConnection time.Duration `mapstructure:"database_max_lifetime_connection"`  // in seconds or minutes as needed
 }

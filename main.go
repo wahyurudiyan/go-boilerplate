@@ -21,19 +21,22 @@ func init() {
 // @version 0.1
 // @description This is a sample boilerplate project for golang backend service
 // @termsOfService http://swagger.io/terms/
-// @contact.name API Support
-// @contact.email fiber@swagger.io
+// @contact.name Go Boilerplate API Support
+// @contact.email wahyurudiyan@gmail.com
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
+	parentCtx := context.Background()
+
 	var cfg *env.ServiceConfig
-	configz.MustLoadEnv(&cfg)
-	ctx := context.Background()
+	if err := configz.LoadFromDotenv(".env.example", &cfg); err != nil {
+		panic(err)
+	}
 
 	// Setup Opentelemetry SDK
-	telemetryShutdown, err := telemetry.SetupOpentelemetry(ctx, telemetry.TelemetrySetup{
+	telemetryShutdown, err := telemetry.SetupOpentelemetry(parentCtx, telemetry.TelemetrySetup{
 		Interval:           cfg.TelemetryMeterInterval,
 		ServiceName:        cfg.ApplicationName,
 		ServiceVersion:     cfg.ApplicationVersion,
@@ -43,16 +46,18 @@ func main() {
 		panic(err)
 	}
 
-	defer func() {
-		err = errors.Join(err, telemetryShutdown(ctx))
-		slog.Error("Service shutting down with error", "error", err)
-	}()
-
 	// Run application gracefully
 	runApp := map[string]graceful.ExecCallback{
 		"http-server": app.RestBootstrap(cfg),
+		"opentelemetry": func(ctx context.Context) (graceful.ShutdownCallback, error) {
+			return func(ctx context.Context) error {
+				err = errors.Join(err, telemetryShutdown(ctx))
+				slog.Error("Service shutting down with error", "error", err)
+				return err
+			}, nil
+		},
 	}
-	if err := graceful.Run(context.Background(), time.Duration(10*time.Second), runApp); err != nil {
+	if err := graceful.Run(parentCtx, time.Duration(10*time.Second), runApp); err != nil {
 		panic(err)
 	}
 }

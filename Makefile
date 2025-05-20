@@ -4,7 +4,7 @@
 all: swagger build run
 
 # Build the application
-build:
+build: swagger
 	@echo "Building application..."
 	@go build -o app .
 

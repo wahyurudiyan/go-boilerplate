@@ -20,7 +20,6 @@ func Run(ctx context.Context, timeout time.Duration, ops map[string]ExecCallback
 	defer cancel()
 
 	// Start all operations and collect shutdown callbacks
-	var shutdownCallbacksMu sync.Mutex
 	shutdownCallbacks := make(map[string]ShutdownCallback)
 	var startupWg sync.WaitGroup
 	var startupErr error
@@ -47,9 +46,6 @@ func Run(ctx context.Context, timeout time.Duration, ops map[string]ExecCallback
 			}
 
 			if callback != nil {
-				shutdownCallbacksMu.Lock()
-				shutdownCallbacks[name] = callback
-				shutdownCallbacksMu.Unlock()
 				slog.InfoContext(ctx, "[Graceful] ✅ service started successfully", "name", name)
 			}
 		}(name, operation)
@@ -73,15 +69,8 @@ func Run(ctx context.Context, timeout time.Duration, ops map[string]ExecCallback
 	}
 
 	// Initiate shutdown process
-	slog.InfoContext(ctx, "[Graceful] 🌟 service shutting down")
-	shutdownCallbacksMu.Lock()
-	cloneCallback := make(map[string]ShutdownCallback, len(shutdownCallbacks))
-	for k, v := range shutdownCallbacks {
-		cloneCallback[k] = v
-	}
-	shutdownCallbacksMu.Unlock()
-
-	wait, err := Shutdown(ctx, timeout, cloneCallback)
+	slog.InfoContext(ctx, "[Graceful] 🌟 register service shutdown callback")
+	wait, err := Shutdown(ctx, timeout, shutdownCallbacks)
 	if err != nil {
 		return err
 	}
