@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package serviceuser;
+
+option go_package = "github.com/wahyurudiyan/go-bolierplate/api/grpc/serviceuser";
+
+message SignUpRequest {
+    string Role = 1;
+    string Email = 2;
+    string Fullname = 3;
+    string Username = 4;
+    string Password = 5;
+}
+
+message SignUpResponse {
+}
+
+service ServiceUser {
+    rpc SignUp(SignUpRequest) returns (SignUpResponse);
+}

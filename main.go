@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/wahyurudiyan/go-boilerplate/app"
-	env "github.com/wahyurudiyan/go-boilerplate/config"
-	"github.com/wahyurudiyan/go-boilerplate/pkg/configz"
 	"github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
 	"github.com/wahyurudiyan/go-boilerplate/pkg/telemetry"
 )
@@ -29,13 +27,10 @@ func init() {
 // @BasePath /api/v1
 func main() {
 	parentCtx := context.Background()
-
-	var cfg *env.ServiceConfig
-	if err := configz.LoadFromDotenv(".env.example", &cfg); err != nil {
-		panic(err)
-	}
+	application := app.NewApp()
 
 	// Setup Opentelemetry SDK
+	cfg := application.GetServiceConfig()
 	telemetryShutdown, err := telemetry.SetupOpentelemetry(parentCtx, telemetry.TelemetrySetup{
 		Interval:           cfg.TelemetryMeterInterval,
 		ServiceName:        cfg.ApplicationName,
@@ -48,8 +43,9 @@ func main() {
 
 	// Run application gracefully
 	runApp := map[string]graceful.ExecCallback{
-		"http-server": app.RestBootstrap(cfg),
-		"opentelemetry": func(ctx context.Context) (graceful.ShutdownCallback, error) {
+		"REST": application.RestBootstrap(),
+		"GRPC": application.GRPCBootstrap(),
+		"OPENTELEMETRY": func(ctx context.Context) (graceful.ShutdownCallback, error) {
 			return func(ctx context.Context) error {
 				err = errors.Join(err, telemetryShutdown(ctx))
 				slog.Error("Service shutting down with error", "error", err)

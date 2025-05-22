@@ -6,46 +6,20 @@ import (
 
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/controller"
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/routes"
-	"github.com/wahyurudiyan/go-boilerplate/cmd/rest"
-	"github.com/wahyurudiyan/go-boilerplate/config"
-	userRepo "github.com/wahyurudiyan/go-boilerplate/core/repositories/user"
-	userSvc "github.com/wahyurudiyan/go-boilerplate/core/services/user"
-	"github.com/wahyurudiyan/go-boilerplate/pkg/configz"
+	"github.com/wahyurudiyan/go-boilerplate/internal/rest"
 	"github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
-	"github.com/wahyurudiyan/go-boilerplate/pkg/sql"
 )
 
-func RestBootstrap(cfg *config.ServiceConfig) graceful.ExecCallback {
-	var sqlConfig sql.SQLConfig
-	if err := configz.LoadFromAWSParameterStore("(/go-boilerplate/", "user", &sqlConfig); err != nil {
-		panic(err)
-	}
-
-	sql, err := sql.NewClient(&sqlConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	// User repositories contruction
-	userRepo := userRepo.NewUserSQLRepository(sql)
-
-	// User services construction
-	repoDependency := userSvc.UserServicesImpl{
-		UserRepo: userRepo,
-	}
-	userService := userSvc.NewUserService(repoDependency)
-
+func (a *appBoostraper) RestBootstrap() graceful.ExecCallback {
 	// Controller bootstraping
 	controllerDependency := controller.ControllerBootstrap{
-		UserService: userService,
+		UserService: a.userService,
 	}
 	controller := controller.Bootstrap(controllerDependency)
-
 	// Setup router
 	router := routes.NewRouter(controller)
-
 	return func(ctx context.Context) (graceful.ShutdownCallback, error) {
-		srv := rest.NewGinServer(cfg)
+		srv := rest.NewGinServer(a.cfg)
 		srv.RegisterRoutes(router.Routes)
 
 		// Run the server
