@@ -1,14 +1,12 @@
 package configz
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"reflect"
-	"strings"
 
 	awsssm "github.com/PaddleHQ/go-aws-ssm"
 	"github.com/go-playground/assert/v2"
@@ -26,10 +24,10 @@ func LoadFromDotenv(filename string, out any) error {
 	}
 
 	v := viper.New()
-
 	v.SetConfigFile(filename)
 	v.SetConfigType("env")
 	v.AutomaticEnv()
+
 	err := v.ReadInConfig()
 	if err != nil {
 		return err
@@ -75,34 +73,11 @@ func LoadFromAWSParameterStore(path, prefix string, out any) error {
 		return err
 	}
 
-	if !assert.IsEqual(prefix, "") {
-		for k, val := range configMap {
-			oldKey := strings.ToUpper(k)
-			prefix := strings.ToUpper(prefix + "_")
-			if strings.HasPrefix(oldKey, prefix) {
-				newKey := strings.TrimPrefix(oldKey, prefix)
-				configMap[newKey] = val
-				delete(configMap, k)
-			}
-		}
-	}
-
-	viper.SetConfigType("json")
-	configByte, err := json.Marshal(configMap)
-	if err != nil {
+	if err := decode(prefix, configMap, out); err != nil {
 		return err
 	}
 
-	bufConfig := bytes.NewReader(configByte)
-	err = viper.ReadConfig(bufConfig)
-	if err != nil {
-		return err
-	}
-
-	err = viper.Unmarshal(&out)
-	if err != nil {
-		return err
-	}
+	slog.Info("Configuration loaded from", "path", path)
 
 	return nil
 }

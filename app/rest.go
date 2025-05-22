@@ -6,7 +6,7 @@ import (
 
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/controller"
 	"github.com/wahyurudiyan/go-boilerplate/api/rest/routes"
-	"github.com/wahyurudiyan/go-boilerplate/infrastructure/rest"
+	"github.com/wahyurudiyan/go-boilerplate/internal/rest"
 	"github.com/wahyurudiyan/go-boilerplate/pkg/graceful"
 )
 

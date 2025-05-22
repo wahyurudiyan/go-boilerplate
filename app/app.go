@@ -1,6 +1,10 @@
 package app
 
 import (
+	"context"
+	"os"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/wahyurudiyan/go-boilerplate/config"
 	userRepo "github.com/wahyurudiyan/go-boilerplate/core/repositories/user"
@@ -17,7 +21,13 @@ type appBoostraper struct {
 
 func NewApp() *appBoostraper {
 	var cfg *config.ServiceConfig
-	if err := configz.LoadFromAWSParameterStore("/go-boilerplate/", "user", &cfg); err != nil {
+	vc := configz.NewVault(&configz.VaultConfig{
+		Prefix:  "user",
+		Token:   os.Getenv("VAULT_TOKEN"),
+		Address: "http://localhost:8200",
+		Timeout: time.Duration(30 * time.Second),
+	})
+	if err := vc.LoadConfig(context.Background(), "/v1/kv/data/go-boilerplate", &cfg); err != nil {
 		panic(err)
 	}
 
